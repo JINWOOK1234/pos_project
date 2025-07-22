@@ -1,0 +1,144 @@
+/* static/style.css */
+body {
+    font-family: sans-serif;
+    margin: 0;
+    background-color: #f0f2f5;
+    color: #333;
+}
+.pos-container {
+    display: flex;
+    height: 100vh;
+}
+.left-panel {
+    width: 60%;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+}
+.right-panel {
+    width: 40%;
+    padding: 15px;
+    background-color: #e9ebee;
+    border-left: 1px solid #ccc;
+    display: flex;
+    flex-direction: column;
+}
+.header {
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #f56a00;
+    padding: 10px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+.customer-info {
+    padding: 10px;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+}
+.order-list-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+th {
+    background-color: #f2f2f2;
+}
+.summary-panel {
+    margin-top: 10px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    text-align: right;
+    font-size: 18px;
+    font-weight: bold;
+}
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    flex-grow: 1;
+}
+.grid-container button {
+    padding: 20px 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background-color: #fff;
+}
+.grid-container button:hover {
+    background-color: #f0f0f0;
+}
+.action-buttons {
+    margin-top: 10px;
+}
+#payment-btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 18px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    width: 400px;
+}
+#quantity-input {
+    width: 95%;
+    padding: 10px;
+    font-size: 18px;
+    text-align: right;
+    margin-bottom: 5px;
+}
+#modal-price-display {
+    text-align: right;
+    font-size: 16px;
+    color: #f56a00;
+    height: 20px;
+    margin-bottom: 10px;
+}
+.keypad {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+}
+.keypad button {
+    padding: 15px;
+    font-size: 18px;
+}
+.modal-actions {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+}
+.modal-actions button {
+    width: 48%;
+    padding: 10px;
+    font-size: 16px;
+}

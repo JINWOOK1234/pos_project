@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS 시스템</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-size: 0.9rem; /* 전체적인 폰트 크기 소폭 조정 */
+        }
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        #top-bar {
+            background-color: #343a40;
+            color: white;
+            padding: 0.5rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        #top-bar .left-menu a, #top-bar .right-menu a {
+            color: #f8f9fa;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        #top-bar .user-info {
+            display: flex;
+            align-items: center;
+        }
+        #main-content {
+            flex-grow: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        #left-panel {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            border-right: 1px solid #dee2e6;
+        }
+        #right-panel {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+        }
+        #bottom-bar {
+            background-color: #f8f9fa;
+            padding: 0.5rem 1rem;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .order-summary {
+            background-color: #e9ecef;
+            padding: 1rem;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header id="top-bar">
+            <div class="left-menu">
+                <a href="/" class="btn btn-secondary"><i class="bi bi-house-fill"></i> 홈</a>
+            </div>
+            <div class="right-menu">
+                <a href="#" class="btn btn-dark">매입이동</a>
+            </div>
+            <div class="user-info">
+                <span class="navbar-text me-3">
+                    <i class="bi bi-person-circle"></i> <span id="username-display"></span>
+                </span>
+                <button class="btn btn-outline-light" id="logout-btn">로그아웃</button>
+            </div>
+        </header>
+
+        <main id="main-content">
+fds
+\            <section id="left-panel">
+                <ul class="nav nav-tabs" id="main-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="pos-tab" data-bs-toggle="tab" data-bs-target="#pos-tab-pane" type="button" role="tab">주문하기 (POS)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="products-tab" data-bs-toggle="tab" data-bs-target="#products-tab-pane" type="button" role="tab">재고 관리</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders-tab-pane" type="button" role="tab">주문 내역</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="receivables-tab" data-bs-toggle="tab" data-bs-target="#receivables-tab-pane" type="button" role="tab">외상 관리</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content pt-3" id="main-tabs-content">
+                    <div class="tab-pane fade show active" id="pos-tab-pane" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-7">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h3>상품 목록</h3>
+                                    <input type="search" id="product-search-input" class="form-control w-50" placeholder="상품 검색..." oninput="loadProducts()">
+                                </div>
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>이름</th>
+                                            <th>단위</th>
+                                            <th>가격</th>
+                                            <th>재고</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pos-product-list"></tbody>
+                                </table>
+                            </div>
+                            <div class="tab-pane fade" id="purchases-tab-pane" role="tabpanel">
+                                <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="pills-purchases-tab" data-bs-toggle="pill" data-bs-target="#pills-purchases" type="button">매입 내역</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="pills-suppliers-tab" data-bs-toggle="pill" data-bs-target="#pills-suppliers" type="button">공급처 관리</button>
+                                    </li>
+                                </ul>
+                                <div class="tab-content" id="pills-tabContent">
+                                    <div class="tab-pane fade show active" id="pills-purchases" role="tabpanel">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h3>매입 내역</h3>
+                                            <button class="btn btn-primary" onclick="openPurchaseModal()">새 매입 기록</button>
+                                        </div>
+                                        <table class="table mt-3">
+                                            <thead>
+                                                <tr>
+                                                    <th>매입번호</th>
+                                                    <th>매입일자</th>
+                                                    <th>공급처</th>
+                                                    <th>총 매입액</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="purchase-list"></tbody>
+                                        </table>
+                                    </div>
+                                    <div class="tab-pane fade" id="pills-suppliers" role="tabpanel">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h3>공급처 관리</h3>
+                                            <button class="btn btn-primary" onclick="openSupplierModal()">새 공급처 추가</button>
+                                        </div>
+                                        <table class="table mt-3">
+                                            <thead>
+                                                <tr>
+                                                    <th>공급처명</th><th>담당자</th><th>연락처</th><th>작업</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="supplier-list"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h3>주문서</h3>
+                                    <div id="selected-customer-display" class="text-end">
+                                        <small><strong>거래처:</strong> <span id="selected-customer-name">없음</span>
+                                        <button id="clear-customer-btn" class="btn btn-sm btn-outline-danger py-0 px-1 d-none">X</button></small>
+                                    </div>
+                                </div>
+                                <div id="cart" style="min-height: 300px; border: 1px solid #eee; padding: 5px; margin-bottom: 1rem;">
+                                    <ul id="cart-items" class="list-group list-group-flush"></ul>
+                                </div>
+                                <div class="order-summary">
+                                    <h4 class="d-flex justify-content-between">
+                                        <span>총 금액:</span>
+                                        <span><span id="total-amount">0</span>원</span>
+                                    </h4>
+                                    <div class="d-grid gap-2 mt-3">
+                                        <button class="btn btn-primary" onclick="submitOrder('cash')">현금/카드 결제</button>
+                                        <button class="btn btn-warning" id="credit-order-btn" onclick="submitOrder('credit')" disabled>외상 주문</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="products-tab-pane" role="tabpanel">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3>상품 관리</h3>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#product-modal" onclick="openProductModal()">새 상품 추가</button>
+                        </div>
+                        <table class="table mt-3">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>이름</th>
+                                    <th>단위</th>
+                                    <th>가격</th>
+                                    <th>재고</th>
+                                    <th>작업</th>
+                                </tr>
+                            </thead>
+                            <tbody id="management-product-list"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="tab-pane fade" id="orders-tab-pane" role="tabpanel">
+                        <h3>주문 내역 조회</h3>
+                        <div class="row g-3 align-items-center my-2">
+                            <div class="col-auto">
+                                <label for="start-date" class="col-form-label">시작일</label>
+                            </div>
+                            <div class="col-auto">
+                                <input type="date" id="start-date" class="form-control">
+                            </div>
+                            <div class="col-auto">
+                                <label for="end-date" class="col-form-label">종료일</label>
+                            </div>
+                            <div class="col-auto">
+                                <input type="date" id="end-date" class="form-control">
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-info" onclick="loadOrders()">조회</button>
+                            </div>
+                        </div>
+                        <div id="order-list" class="accordion mt-3"></div>
+                    </div>
+
+                    <div class="tab-pane fade" id="receivables-tab-pane" role="tabpanel">
+                        <h3>외상대금 관리</h3>
+                        <p class="text-muted">외상 잔액이 있는 거래처 목록입니다.</p>
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>거래처명</th>
+                                    <th>연락처</th>
+                                    <th>외상 잔액</th>
+                                    <th>작업</th>
+                                </tr>
+                            </thead>
+                            <tbody id="receivables-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <aside id="right-panel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3>거래처 목록</h3>
+                    <button class="btn btn-primary" onclick="openCustomerModal()">새 거래처 추가</button>
+                </div>
+                <div class="input-group mb-3">
+                    <input type="search" id="customer-search-input" class="form-control" placeholder="거래처 검색..." oninput="loadCustomers()">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                </div>
+                <div id="customer-list" class="list-group" style="cursor: pointer;">
+                </div>
+            </aside>
+        </main>
+
+        <footer id="bottom-bar">
+            <div>
+                <a href="#">도움말</a>
+            </div>
+            <div id="current-time"></div>
+        </footer>
+    </div>
+
+    <div class="modal fade" id="customer-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="customer-modal-title">거래처 정보</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="customer-form">
+                        <input type="hidden" id="customer-id">
+                        <div class="mb-3">
+                            <label for="customer-name" class="form-label">거래처명</label>
+                            <input type="text" class="form-control" id="customer-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="customer-phone" class="form-label">전화번호</label>
+                            <input type="text" class="form-control" id="customer-phone">
+                        </div>
+                        <div class="mb-3">
+                            <label for="customer-address" class="form-label">주소</label>
+                            <input type="text" class="form-control" id="customer-address">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCustomer()">저장</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="product-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="product-modal-title">상품 정보</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="product-form">
+                        <div class="mb-3">
+                            <label for="product-id-input" class="form-label">상품 ID</label>
+                            <input type="text" class="form-control" id="product-id-input" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="product-name" class="form-label">상품명</label>
+                            <input type="text" class="form-control" id="product-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="product-unit" class="form-label">단위</label>
+                            <input type="text" class="form-control" id="product-unit" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="product-price" class="form-label">가격</label>
+                            <input type="number" class="form-control" id="product-price" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="product-stock" class="form-label">재고</label>
+                            <input type="number" class="form-control" id="product-stock" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                    <button type="button" class="btn btn-primary" onclick="saveProduct()">저장</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="stock-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">재고 조정</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>상품:</strong> <span id="stock-product-name"></span></p>
+                    <p><strong>현재 재고:</strong> <span id="stock-current-quantity"></span></p>
+                    <input type="hidden" id="stock-product-id">
+                    <div class="mb-3">
+                        <label for="stock-adjustment" class="form-label">조정 수량 (양수: 증가, 음수: 감소)</label>
+                        <input type="number" class="form-control" id="stock-adjustment" placeholder="예: 5 또는 -3">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                    <button type="button" class="btn btn-primary" onclick="adjustStock()">적용</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="payment-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">입금 처리</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>거래처:</strong> <span id="payment-customer-name"></span></p>
+                    <p><strong>현재 잔액:</strong> <span id="payment-current-balance"></span>원</p>
+                    <form id="payment-form">
+                        <input type="hidden" id="payment-customer-id">
+                        <div class="mb-3">
+                            <label for="payment-amount" class="form-label">입금액</label>
+                            <input type="number" class="form-control" id="payment-amount" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="payment-notes" class="form-label">메모 (선택)</label>
+                            <input type="text" class="form-control" id="payment-notes">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                    <button type="button" class="btn btn-primary" onclick="recordPayment()">입금 기록</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <div class="modal fade" id="supplier-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="supplier-modal-title">공급처 정보</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="supplier-form">
+                        <input type="hidden" id="supplier-id">
+                        <div class="mb-3">
+                            <label for="supplier-name" class="form-label">공급처명</label>
+                            <input type="text" class="form-control" id="supplier-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="supplier-contact-person" class="form-label">담당자명</label>
+                            <input type="text" class="form-control" id="supplier-contact-person">
+                        </div>
+                        <div class="mb-3">
+                           <label for="supplier-phone" class="form-label">연락처</label>
+                           <input type="text" class="form-control" id="supplier-phone">
+                       </div>
+                   </form>
+               </div>
+               <div class="modal-footer">
+                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                   <button type="button" class="btn btn-primary" onclick="saveSupplier()">저장</button>
+               </div>
+           </div>
+        </div>
+    </div>
+      <div class="modal fade" id="purchase-modal" tabindex="-1">
+       <div class="modal-dialog modal-lg">
+           <div class="modal-content">
+               <div class="modal-header">
+                   <h5 class="modal-title">새 매입 기록</h5>
+                   <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+               </div>
+               <div class="modal-body">
+                   <form id="purchase-form">
+                       <div class="mb-3">
+                           <label for="purchase-supplier" class="form-label">공급처 (선택)</label>
+                           <select class="form-select" id="purchase-supplier"></select>
+                       </div>
+                       <hr>
+                       <h6>매입 상품 추가</h6>
+                       <div class="row g-3">
+                           <div class="col-md-4"><select class="form-select" id="purchase-product-select"></select></div>
+                            <div class="col-md-3"><input type="number" class="form-control" id="purchase-quantity" placeholder="수량"></div>
+                            <div class="col-md-3"><input type="number" class="form-control" id="purchase-cost" placeholder="매입 단가"></div>
+                            <div class="col-md-2 d-grid"><button type="button" class="btn btn-secondary" onclick="addProductToPurchaseCart()">담기</button></div>
+                        </div>
+                        <h6 class="mt-4">매입 목록</h6>
+                        <ul id="purchase-cart-items" class="list-group"></ul>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" onclick="recordPurchase()">매입 기록 저장</button>
+                </div>
+            </div>
+        </div>
+    </div>
+ 
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 전역 변수 및 상태
+        let cart = [];
+        let purchaseCart = []; // [신규]
+        let selectedCustomer = null;
+        let productModal, customerModal, stockModal, paymentModal, supplierModal, purchaseModal; // [수정]
+        let timeInterval;
+
+        // --- 초기화 및 이벤트 리스너 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            productModal = new bootstrap.Modal(document.getElementById('product-modal'));
+            customerModal = new bootstrap.Modal(document.getElementById('customer-modal'));
+            stockModal = new bootstrap.Modal(document.getElementById('stock-modal'));
+            paymentModal = new bootstrap.Modal(document.getElementById('payment-modal'));
+            supplierModal = new bootstrap.Modal(document.getElementById('supplier-modal')); // [신규]
+            purchaseModal = new bootstrap.Modal(document.getElementById('purchase-modal')); // [신규]
+
+            loadUsername();
+            loadProducts();
+            loadOrders();
+            loadCustomers();
+            updateTime();
+            timeInterval = setInterval(updateTime, 1000);
+
+            document.getElementById('logout-btn').addEventListener('click', logout);
+            document.getElementById('clear-customer-btn').addEventListener('click', clearCustomerSelection);
+            
+            document.getElementById('products-tab').addEventListener('click', loadProducts);
+            document.getElementById('orders-tab').addEventListener('click', loadOrders);
+            document.getElementById('receivables-tab').addEventListener('click', loadReceivables);
+            document.getElementById('purchases-tab').addEventListener('click', () => { // [신규]
+                loadPurchaseHistory();
+                loadSuppliers();
+            });
+        });
+
+        // --- 유틸리티 함수 ---
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleString('ko-KR');
+        }
+
+        // --- 인증 관련 함수 ---
+        async function loadUsername() {
+            const response = await fetch('/api/auth/status');
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('username-display').textContent = data.username;
+            } else {
+                window.location.href = '/login';
+            }
+        }
+
+        async function logout() {
+            clearInterval(timeInterval);
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = '/login';
+        }
+
+        // --- 상품 관련 함수 ---
+        async function loadProducts() {
+            const searchInput = document.getElementById('product-search-input');
+            const searchTerm = searchInput ? searchInput.value : '';
+            
+            let url = '/api/products';
+            if (searchTerm) {
+                url += `?search=${encodeURIComponent(searchTerm)}`;
+            }
+
+            const response = await fetch(url);
+            const products = await response.json();
+            
+            const posList = document.getElementById('pos-product-list');
+            const mgmtList = document.getElementById('management-product-list');
+            posList.innerHTML = '';
+            mgmtList.innerHTML = '';
+            
+            if (products.length === 0) {
+                const messageRow = `<tr><td colspan="6" class="text-center">${searchTerm ? '검색 결과가 없습니다.' : '등록된 상품이 없습니다.'}</td></tr>`;
+                posList.innerHTML = messageRow;
+                mgmtList.innerHTML = messageRow;
+                return;
+            }
+
+            for (const p of products) {
+                posList.innerHTML += `
+                    <tr>
+                        <td>${p.id}</td>
+                        <td>${p.name}</td>
+                        <td>${p.unit}</td>
+                        <td>${p.price.toLocaleString()}</td>
+                        <td>${p.stock_quantity}</td>
+                        <td><button class="btn btn-sm btn-primary" onclick="addToCart('${p.id}', '${p.name}', ${p.price})">담기</button></td>
+                    </tr>
+                `;
+
+                mgmtList.innerHTML += `
+                    <tr>
+                        <td>${p.id}</td>
+                        <td>${p.name}</td>
+                        <td>${p.unit}</td>
+                        <td>${p.price.toLocaleString()}</td>
+                        <td>${p.stock_quantity}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="openProductModal('${p.id}')">수정</button>
+                            <button class="btn btn-sm btn-warning" onclick="openStockModal('${p.id}', '${p.name}', ${p.stock_quantity})">재고조정</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteProduct('${p.id}')">삭제</button>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function openProductModal(productId = null) {
+            const form = document.getElementById('product-form');
+            form.reset();
+            const idInput = document.getElementById('product-id-input');
+            
+            if (productId) {
+                document.getElementById('product-modal-title').textContent = '상품 수정';
+                idInput.readOnly = true;
+                fetch(`/api/product/${productId}`)
+                    .then(res => res.json())
+                    .then(p => {
+                        idInput.value = p.id;
+                        document.getElementById('product-name').value = p.name;
+                        document.getElementById('product-unit').value = p.unit;
+                        document.getElementById('product-price').value = p.price;
+                        document.getElementById('product-stock').value = p.stock_quantity;
+                    });
+            } else {
+                document.getElementById('product-modal-title').textContent = '새 상품 추가';
+                idInput.readOnly = false;
+                idInput.value = '';
+            }
+            productModal.show();
+        }
+
+        async function saveProduct() {
+            const idInput = document.getElementById('product-id-input');
+            const id = idInput.value;
+
+            if (!id) {
+                alert('상품 ID를 입력해주세요.');
+                return;
+            }
+
+            const productData = {
+                id: id,
+                name: document.getElementById('product-name').value,
+                unit: document.getElementById('product-unit').value,
+                price: parseInt(document.getElementById('product-price').value),
+                stock_quantity: parseInt(document.getElementById('product-stock').value)
+            };
+
+            const isEditMode = idInput.readOnly;
+            const url = isEditMode ? `/api/product/${id}` : '/api/products';
+            const method = isEditMode ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(productData)
+            });
+
+            if (response.ok) {
+                productModal.hide();
+                loadProducts();
+            } else {
+                const data = await response.json();
+                alert(`저장 실패: ${data.error}`);
+            }
+        }
+
+        async function deleteProduct(productId) {
+            if (confirm('정말로 이 상품을 삭제하시겠습니까?')) {
+                const response = await fetch(`/api/product/${productId}`, { method: 'DELETE' });
+                if (response.ok) {
+                    loadProducts();
+                } else {
+                    alert('삭제에 실패했습니다.');
+                }
+            }
+        }
+
+        // --- 거래처 관련 함수 ---
+        async function loadCustomers() {
+            try {
+                const searchInput = document.getElementById('customer-search-input');
+                const searchTerm = searchInput ? searchInput.value : '';
+                
+                let url = '/api/customers';
+                if (searchTerm) {
+                    url += `?search=${encodeURIComponent(searchTerm)}`;
+                }
+                const response = await fetch(url);
+                const customers = await response.json();
+                const customerList = document.getElementById('customer-list');
+                customerList.innerHTML = '';
+
+                if (customers.length === 0) {
+                    customerList.innerHTML = `<div class="list-group-item">${searchTerm ? '검색 결과가 없습니다.' : '등록된 거래처가 없습니다.'}</div>`;
+                    return;
+                }
+
+                customers.forEach(c => {
+                    const customerItem = document.createElement('a');
+                    customerItem.href = '#';
+                    customerItem.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center p-2';
+                    customerItem.innerHTML = `
+                        <div>
+                            <h6 class="mb-1">${c.name}</h6>
+                            <small class="text-muted">${c.phone_number || ''}</small>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline-secondary me-1 py-0 px-1" onclick="event.stopPropagation(); openCustomerModal(${c.id})"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-danger py-0 px-1" onclick="event.stopPropagation(); deleteCustomer(${c.id})"><i class="bi bi-trash"></i></button>
+                        </div>
+                    `;
+                    customerItem.onclick = (e) => {
+                        e.preventDefault();
+                        selectCustomer(c);
+                    };
+                    customerList.appendChild(customerItem);
+                });
+            } catch (error) {
+                console.error("Failed to load customers:", error);
+            }
+        }
+
+        function openCustomerModal(customerId = null) {
+            const form = document.getElementById('customer-form');
+            form.reset();
+            document.getElementById('customer-id').value = '';
+            
+            if (customerId) {
+                document.getElementById('customer-modal-title').textContent = '거래처 수정';
+                fetch(`/api/customer/${customerId}`)
+                    .then(res => res.json())
+                    .then(c => {
+                        document.getElementById('customer-id').value = c.id;
+                        document.getElementById('customer-name').value = c.name;
+                        document.getElementById('customer-phone').value = c.phone_number;
+                        document.getElementById('customer-address').value = c.address;
+                    });
+            } else {
+                document.getElementById('customer-modal-title').textContent = '새 거래처 추가';
+            }
+            customerModal.show();
+        }
+
+        async function saveCustomer() {
+            const id = document.getElementById('customer-id').value;
+            const customerData = {
+                name: document.getElementById('customer-name').value,
+                phone_number: document.getElementById('customer-phone').value,
+                address: document.getElementById('customer-address').value
+            };
+
+            const url = id ? `/api/customer/${id}` : '/api/customers';
+            const method = id ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(customerData)
+            });
+
+            if (response.ok) {
+                customerModal.hide();
+                loadCustomers();
+            } else {
+                const data = await response.json();
+                alert(`저장 실패: ${data.error}`);
+            }
+        }
+
+        async function deleteCustomer(customerId) {
+            if (confirm('정말로 이 거래처를 삭제하시겠습니까? 연결된 주문이 있을 경우 문제가 발생할 수 있습니다.')) {
+                const response = await fetch(`/api/customer/${customerId}`, { method: 'DELETE' });
+                if (response.ok) {
+                    loadCustomers();
+                } else {
+                    alert('삭제에 실패했습니다.');
+                }
+            }
+        }
+
+        // --- 재고 관련 함수 ---
+        function openStockModal(productId, name, currentStock) {
+            document.getElementById('stock-product-id').value = productId;
+            document.getElementById('stock-product-name').textContent = name;
+            document.getElementById('stock-current-quantity').textContent = currentStock;
+            document.getElementById('stock-adjustment').value = '';
+            stockModal.show();
+        }
+
+        async function adjustStock() {
+            const productId = document.getElementById('stock-product-id').value;
+            const adjustment = parseInt(document.getElementById('stock-adjustment').value);
+
+            if (isNaN(adjustment)) {
+                alert('유효한 숫자를 입력하세요.');
+                return;
+            }
+
+            const response = await fetch(`/api/product/${productId}/stock`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ adjustment })
+            });
+
+            if (response.ok) {
+                stockModal.hide();
+                loadProducts();
+            } else {
+                const data = await response.json();
+                alert(`재고 조정 실패: ${data.error}`);
+            }
+        }
+
+        // --- 외상 관리 관련 함수 ---
+        async function loadReceivables() {
+            const response = await fetch('/api/customers/receivables');
+            const receivables = await response.json();
+            const list = document.getElementById('receivables-list');
+            list.innerHTML = '';
+
+            if (receivables.length === 0) {
+                list.innerHTML = `<tr><td colspan="4" class="text-center text-muted">외상 잔액이 있는 거래처가 없습니다.</td></tr>`;
+                return;
+            }
+
+            receivables.forEach(r => {
+                list.innerHTML += `
+                    <tr>
+                        <td>${r.name}</td>
+                        <td>${r.phone_number || '-'}</td>
+                        <td>${r.receivable_balance.toLocaleString()}원</td>
+                        <td>
+                            <button class="btn btn-sm btn-success" onclick="openPaymentModal(${r.id}, '${r.name}', ${r.receivable_balance})">입금 처리</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function openPaymentModal(customerId, name, balance) {
+            document.getElementById('payment-form').reset();
+            document.getElementById('payment-customer-id').value = customerId;
+            document.getElementById('payment-customer-name').textContent = name;
+            document.getElementById('payment-current-balance').textContent = balance.toLocaleString();
+            paymentModal.show();
+        }
+
+        async function recordPayment() {
+            const customerId = document.getElementById('payment-customer-id').value;
+            const amount = document.getElementById('payment-amount').value;
+            const notes = document.getElementById('payment-notes').value;
+
+            if (!amount || parseInt(amount) <= 0) {
+                alert('올바른 입금액을 입력해주세요.');
+                return;
+            }
+
+            const response = await fetch(`/api/customer/${customerId}/payments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: parseInt(amount), notes: notes })
+            });
+
+            if (response.ok) {
+                paymentModal.hide();
+                loadReceivables();
+                loadCustomers();
+            } else {
+                const data = await response.json();
+                alert(`입금 처리 실패: ${data.error}`);
+            }
+        }
+
+        // --- 주문(POS) 관련 함수 ---
+        function addToCart(id, name, price) {
+            const existingItem = cart.find(item => item.id === id);
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                cart.push({ id, name, price, quantity: 1 });
+            }
+            renderCart();
+        }
+
+        function selectCustomer(customer) {
+            selectedCustomer = customer;
+            document.getElementById('selected-customer-name').textContent = customer.name;
+            document.getElementById('clear-customer-btn').classList.remove('d-none');
+            document.getElementById('credit-order-btn').disabled = false;
+        }
+
+        function clearCustomerSelection() {
+            selectedCustomer = null;
+            document.getElementById('selected-customer-name').textContent = '없음';
+            document.getElementById('clear-customer-btn').classList.add('d-none');
+            document.getElementById('credit-order-btn').disabled = true;
+        }
+
+        function renderCart() {
+            const cartItems = document.getElementById('cart-items');
+            cartItems.innerHTML = '';
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                total += item.price * item.quantity;
+                cartItems.innerHTML += `
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>${item.name} (${item.price.toLocaleString()}원)</div>
+                        <div>
+                            <button class="btn btn-sm btn-secondary py-0" onclick="updateCartQuantity(${index}, -1)">-</button>
+                            <span class="mx-2">${item.quantity}</span>
+                            <button class="btn btn-sm btn-secondary py-0" onclick="updateCartQuantity(${index}, 1)">+</button>
+                        </div>
+                    </li>
+                `;
+            });
+            document.getElementById('total-amount').textContent = total.toLocaleString();
+        }
+
+        function updateCartQuantity(index, change) {
+            cart[index].quantity += change;
+            if (cart[index].quantity <= 0) {
+                cart.splice(index, 1);
+            }
+            renderCart();
+        }
+
+        async function submitOrder(paymentMethod) {
+            if (cart.length === 0) {
+                alert('주문할 상품이 없습니다.');
+                return;
+            }
+            if (paymentMethod === 'credit' && !selectedCustomer) {
+                alert('외상 주문을 하려면 거래처를 먼저 선택해야 합니다.');
+                return;
+            }
+
+            const orderData = {
+                items: cart.map(item => ({
+                    id: item.id,
+                    quantity: item.quantity,
+                    price: item.price
+                })),
+                total_amount: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+                payment_method: paymentMethod
+            };
+
+            if (selectedCustomer) {
+                orderData.customer_id = selectedCustomer.id;
+            }
+
+            const response = await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            });
+
+            if (response.ok) {
+                alert('주문이 완료되었습니다.');
+                cart = [];
+                clearCustomerSelection();
+                renderCart();
+                loadProducts();
+                loadOrders();
+            } else {
+                const data = await response.json();
+                alert(`주문 실패: ${data.error}`);
+            }
+        }
+
+        // --- 주문 내역 관련 함수 ---
+        async function loadOrders() {
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            let url = '/api/orders';
+            const params = new URLSearchParams();
+            if (startDate) params.append('start_date', startDate);
+            if (endDate) params.append('end_date', endDate);
+            if (params.toString()) url += `?${params.toString()}`;
+
+            const response = await fetch(url);
+            const orders = await response.json();
+            const orderList = document.getElementById('order-list');
+            orderList.innerHTML = '';
+
+            orders.forEach(order => {
+                const itemsHtml = order.items.map(item => `<li>${item.product_name}: ${item.quantity}개</li>`).join('');
+                const customerNameHtml = order.customer_name ? `<small class="text-muted"> (${order.customer_name})</small>` : '';
+                const isCancelled = order.status === 'cancelled';
+                orderList.innerHTML += `
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${order.id}">
+                                주문 #${order.id} - ${new Date(order.order_date).toLocaleString()} - ${order.total_amount.toLocaleString()}원${customerNameHtml}
+                                <span class="badge bg-${isCancelled ? 'danger' : 'success'} ms-2">${order.status}</span>
+                            </button>
+                        </h2>
+                        <div id="collapse-${order.id}" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <ul>${itemsHtml}</ul>
+                                ${!isCancelled ? `<button class="btn btn-sm btn-danger" onclick="cancelOrder(${order.id})">주문 취소</button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function cancelOrder(orderId) {
+            if (confirm(`주문 #${orderId}를 정말로 취소하시겠습니까?`)) {
+                const response = await fetch(`/api/order/${orderId}`, { method: 'DELETE' });
+                if (response.ok) {
+                    loadOrders();
+                    loadProducts();
+                } else {
+                    alert('주문 취소에 실패했습니다.');
+                }
+            }
+        }
+
+        // --- [신규] 공급처 관련 함수 ---
+        async function loadSuppliers() {
+            const response = await fetch('/api/suppliers');
+            const suppliers = await response.json();
+            const list = document.getElementById('supplier-list');
+            const select = document.getElementById('purchase-supplier');
+            list.innerHTML = '';
+            select.innerHTML = '<option value="">공급처 선택 안 함</option>';
+
+            suppliers.forEach(s => {
+                list.innerHTML += `
+                    <tr>
+                        <td>${s.name}</td>
+                        <td>${s.contact_person || '-'}</td>
+                        <td>${s.phone_number || '-'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="openSupplierModal(${s.id})">수정</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteSupplier(${s.id})">삭제</button>
+                        </td>
+                    </tr>
+                `;
+                select.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+            });
+        }
+
+        function openSupplierModal(supplierId = null) {
+            document.getElementById('supplier-form').reset();
+            document.getElementById('supplier-id').value = '';
+            if(supplierId) {
+                document.getElementById('supplier-modal-title').textContent = '공급처 수정';
+                fetch(`/api/suppliers?id=${supplierId}`).then(res => res.json()).then(s => {
+                    document.getElementById('supplier-id').value = s.id;
+                    document.getElementById('supplier-name').value = s.name;
+                    document.getElementById('supplier-contact-person').value = s.contact_person;
+                    document.getElementById('supplier-phone').value = s.phone_number;
+                });
+            } else {
+                document.getElementById('supplier-modal-title').textContent = '새 공급처 추가';
+            }
+            supplierModal.show();
+        }
+
+        async function saveSupplier() {
+            const id = document.getElementById('supplier-id').value;
+            const data = {
+                name: document.getElementById('supplier-name').value,
+                contact_person: document.getElementById('supplier-contact-person').value,
+                phone_number: document.getElementById('supplier-phone').value,
+            };
+            const url = id ? `/api/supplier/${id}` : '/api/suppliers';
+            const method = id ? 'PUT' : 'POST';
+            const response = await fetch(url, { method, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
+            if(response.ok) {
+                supplierModal.hide();
+                loadSuppliers();
+            } else {
+                alert('공급처 저장에 실패했습니다.');
+            }
+        }
+
+        async function deleteSupplier(supplierId) {
+            if(confirm('이 공급처를 정말 삭제하시겠습니까?')) {
+                const response = await fetch(`/api/supplier/${supplierId}`, {method: 'DELETE'});
+                if(response.ok) { loadSuppliers(); } else { alert('삭제 실패. 매입 내역이 연결되어 있을 수 있습니다.'); }
+            }
+        }
+
+        // --- [신규] 매입 관련 함수 ---
+        async function loadPurchaseHistory() {
+            const response = await fetch('/api/purchases');
+            const purchases = await response.json();
+            const list = document.getElementById('purchase-list');
+            list.innerHTML = '';
+            purchases.forEach(p => {
+                list.innerHTML += `<tr><td>${p.id}</td><td>${new Date(p.purchase_date).toLocaleString()}</td><td>${p.supplier_name}</td><td>${p.total_cost.toLocaleString()}원</td></tr>`;
+            });
+        }
+
+        async function openPurchaseModal() {
+            purchaseCart = [];
+            renderPurchaseCart();
+            await loadSuppliers();
+            
+            const productSelect = document.getElementById('purchase-product-select');
+            const productResponse = await fetch('/api/products');
+            const products = await productResponse.json();
+            productSelect.innerHTML = '<option value="">상품 선택...</option>';
+            products.forEach(p => productSelect.innerHTML += `<option value="${p.id}">${p.name} (${p.unit})</option>`);
+            
+            purchaseModal.show();
+        }
+
+        function addProductToPurchaseCart() {
+            const productId = document.getElementById('purchase-product-select').value;
+            const productName = document.getElementById('purchase-product-select').options[document.getElementById('purchase-product-select').selectedIndex].text;
+            const quantity = parseInt(document.getElementById('purchase-quantity').value);
+            const cost = parseInt(document.getElementById('purchase-cost').value);
+            if(!productId || !quantity || !cost) { alert('상품, 수량, 매입단가를 모두 입력하세요.'); return; }
+            purchaseCart.push({ product_id: productId, name: productName, quantity, cost_per_unit: cost });
+            renderPurchaseCart();
+        }
+
+        function renderPurchaseCart() {
+            const list = document.getElementById('purchase-cart-items');
+            list.innerHTML = '';
+            purchaseCart.forEach((item, index) => {
+                list.innerHTML += `<li class="list-group-item">${item.name} - 수량: ${item.quantity}, 단가: ${item.cost_per_unit.toLocaleString()}원</li>`;
+            });
+        }
+
+        async function recordPurchase() {
+            if (purchaseCart.length === 0) { alert('매입할 상품이 없습니다.'); return; }
+            const purchaseData = {
+                supplier_id: document.getElementById('purchase-supplier').value || null,
+                items: purchaseCart
+            };
+            const response = await fetch('/api/purchases', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(purchaseData) });
+            if(response.ok) {
+                alert('매입 기록이 저장되었습니다.');
+                purchaseModal.hide();
+                loadPurchaseHistory();
+                loadProducts(); // 재고가 변경되었으므로 상품 목록 새로고침
+            } else {
+                const data = await response.json();
+                alert(`매입 실패: ${data.error}`);
+            }
+        }
+
+ 
+    </script>
+</body>
+</html>
