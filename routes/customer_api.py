@@ -2,9 +2,9 @@ from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 from app import db, Customer, PaymentTransaction
 
-customer_bp = Blueprint('customer_bp', __name__)
+customer_bp = Blueprint('customer_bp', __name__, url_prefix='/api')
 
-@customer_bp.route('/api/customers', methods=['GET', 'POST'])
+@customer_bp.route('/customers', methods=['GET', 'POST'])
 @login_required
 def customers_handler():
     if request.method == 'GET':
@@ -29,7 +29,7 @@ def customers_handler():
         db.session.commit()
         return jsonify(new_customer.to_dict()), 201
 
-@customer_bp.route('/api/customer/<int:customer_id>', methods=['GET', 'PUT', 'DELETE'])
+@customer_bp.route('/customer/<int:customer_id>', methods=['GET', 'PUT', 'DELETE'])
 @login_required
 def customer_detail_handler(customer_id):
     customer = Customer.query.filter_by(id=customer_id, user_id=current_user.id).first_or_404()
@@ -54,7 +54,7 @@ def customer_detail_handler(customer_id):
         db.session.commit()
         return '', 204
 
-@customer_bp.route('/api/customer/<int:customer_id>/payments', methods=['GET', 'POST'])
+@customer_bp.route('/customer/<int:customer_id>/payments', methods=['GET', 'POST'])
 @login_required
 def payment_handler(customer_id):
     customer = Customer.query.filter_by(id=customer_id, user_id=current_user.id).first_or_404()
@@ -94,7 +94,7 @@ def payment_handler(customer_id):
             'new_balance': customer.receivable_balance
         }), 201
 
-@customer_bp.route('/api/customers/receivables', methods=['GET'])
+@customer_bp.route('/customers/receivables', methods=['GET'])
 @login_required
 def get_customer_receivables():
     customers = Customer.query.filter(Customer.user_id == current_user.id, Customer.receivable_balance > 0).order_by(Customer.name).all()

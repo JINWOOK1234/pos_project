@@ -78,3 +78,12 @@ def adjust_product_stock(product_id):
     product.stock_quantity += adjustment
     db.session.commit()
     return jsonify({'id': product.id, 'name': product.name, 'stock_quantity': product.stock_quantity})
+
+@product_bp.route('/price')
+@login_required
+def get_price():
+    product_id = request.args.get('productId')
+    product = Product.query.get(product_id)
+    if product:
+        return jsonify({'price': product.price})
+    return jsonify({'error': 'Price not found'}), 404
