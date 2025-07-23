@@ -3,7 +3,7 @@ from flask import Flask, render_template, jsonify, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_migrate import Migrate
+from flask_migrate import Migratefrom sqlalchemy.orm import joinedload
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
 
@@ -125,7 +125,7 @@ class PurchaseOrderItem(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
     cost_per_unit = db.Column(db.Integer, nullable=False) # 매입 시점의 단가
     product = db.relationship('Product')
-
+afd
 
 migrate = Migrate(app, db)
 
@@ -311,7 +311,10 @@ def supplier_detail_handler(supplier_id):
 def purchases_handler():
     """매입 내역을 조회(GET)하거나 새 매입을 기록(POST)합니다."""
     if request.method == 'GET':
-        purchases = PurchaseOrder.query.filter_by(user_id=current_user.id).order_by(PurchaseOrder.purchase_date.desc()).all()
+        purchases = PurchaseOrder.query.options(
+            joinedload(PurchaseOrder.supplier)
+        ).filter_by(user_id=current_user.id).order_by(PurchaseOrder.purchase_date.desc()).all()
+
         return jsonify([{'id': p.id, 'purchase_date': p.purchase_date.isoformat(), 'supplier_name': p.supplier.name if p.supplier else 'N/A', 'total_cost': p.total_cost} for p in purchases])
 
     if request.method == 'POST':
