@@ -1,6 +1,7 @@
 import datetime
 from flask import Flask, render_template, jsonify, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+from models import db, User  # 이제 db와 User를 models.py에서 가져옵니다
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_migrate import Migrate
@@ -24,22 +25,6 @@ login_manager.login_view = 'login_page'
 @login_manager.unauthorized_handler
 def unauthorized():
     return jsonify({'error': 'Login required'}), 401
-
-# 2. 데이터 모델(테이블) 정의
-class User(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
-    orders = db.relationship('Order', backref='user', lazy=True)
-    payment_transactions = db.relationship('PaymentTransaction', backref='user', lazy=True)
-    # [신규] user와 purchase_orders 관계 추가
-    purchase_orders = db.relationship('PurchaseOrder', backref='user', lazy=True)
-
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
 
 class Product(db.Model):
     id = db.Column(db.String(10), primary_key=True)
