@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 
-# app.py에서 정의된 db 객체와 모델들을 임포트합니다.
-from models import db, User # ★★★ 이 부분을 수정합니다. ★★★
+# 이 부분이 이제 안전하게 작동합니다.
+from app import db, User 
 
 auth_bp = Blueprint('auth_bp', __name__, url_prefix='/api/auth')
 

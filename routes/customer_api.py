@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
-from models import db, Customer, PaymentTransaction
+from app import db, Customer, PaymentTransaction
+
 
 customer_bp = Blueprint('customer_bp', __name__, url_prefix='/api')
 

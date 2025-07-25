@@ -4,7 +4,9 @@ from flask_login import login_required, current_user
 from sqlalchemy import func
 
 # app.py에서 정의된 db 객체와 모델들을 임포트합니다.
-from models import db, Order, OrderItem, Product, Customer
+from app  import db, Order, OrderItem, Product, Customer
+
+
 
 # 'order_api'라는 이름의 Blueprint를 생성하고, 모든 라우트에 '/api' 접두사를 붙입니다.
 order_bp = Blueprint('order_api', __name__, url_prefix='/api')

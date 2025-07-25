@@ -4,7 +4,7 @@ from sqlalchemy.orm import joinedload
 
 # app.py에서 정의된 db 객체와 모델들을 임포트합니다.
 
-from models import db, Supplier, PurchaseOrder, PurchaseOrderItem, Product
+from app import db, Supplier, PurchaseOrder, PurchaseOrderItem, Product
 
 supplier_bp = Blueprint('supplier_bp', __name__, url_prefix='/api')
 

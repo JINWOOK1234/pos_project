@@ -4,7 +4,7 @@ from flask_login import login_required, current_user
 from sqlalchemy import func
 
 # app.py에서 정의된 db 객체와 모델들을 임포트합니다.
-from models import db, Order
+from app import db, Order
 
 sales_bp = Blueprint('sales_bp', __name__, url_prefix='/api/sales')
 
