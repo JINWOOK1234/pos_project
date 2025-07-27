@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS 대시보드</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome 아이콘 CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* 추가적인 커스텀 스타일 */
+        .menu-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="flex flex-col min-h-screen">
+        <!-- 헤더 -->
+        <header class="bg-white shadow-md">
+            <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+                <div class="flex items-center">
+                    <i class="fas fa-cash-register text-2xl text-indigo-600 mr-3"></i>
+                    <h1 class="text-xl font-bold text-gray-800">POS System</h1>
+                </div>
+                <div class="flex items-center">
+                    <span class="text-gray-600 mr-4">안녕하세요, <strong class="font-semibold">{{ current_user.username }}</strong>님!</span>
+                    <a href="#" id="logout-button" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                        로그아웃
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- 메인 컨텐츠 -->
+        <main class="flex-grow container mx-auto px-6 py-12">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">메인 메뉴</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                
+                <!-- 매출 등록 카드 -->
+                <a href="{{ url_for('sales_registration_page') }}" class="menu-card bg-white rounded-xl shadow-lg p-8 flex flex-col items-center justify-center text-center hover:bg-indigo-50">
+                    <div class="bg-indigo-100 text-indigo-600 rounded-full p-4 mb-4">
+                        <i class="fas fa-cart-plus fa-2x"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800">매출 등록</h3>
+                    <p class="text-gray-500 mt-2">새로운 판매 내역을 등록합니다.</p>
+                </a>
+
+                <!-- 매입 등록 카드 -->
+                <a href="{{ url_for('purchase_registration_page') }}" class="menu-card bg-white rounded-xl shadow-lg p-8 flex flex-col items-center justify-center text-center hover:bg-blue-50">
+                    <div class="bg-blue-100 text-blue-600 rounded-full p-4 mb-4">
+                        <i class="fas fa-truck-loading fa-2x"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800">매입 등록</h3>
+                    <p class="text-gray-500 mt-2">새로운 입고 내역을 등록합니다.</p>
+                </a>
+
+                <!-- 환경 설정 카드 -->
+                <a href="{{ url_for('settings_page') }}" class="menu-card bg-white rounded-xl shadow-lg p-8 flex flex-col items-center justify-center text-center hover:bg-gray-50">
+                    <div class="bg-gray-200 text-gray-700 rounded-full p-4 mb-4">
+                        <i class="fas fa-cogs fa-2x"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800">환경 설정</h3>
+                    <p class="text-gray-500 mt-2">상품, 거래처 등을 관리합니다.</p>
+                </a>
+
+                <!-- 판매 현황 카드 -->
+                <a href="{{ url_for('sales_status_page') }}" class="menu-card bg-white rounded-xl shadow-lg p-8 flex flex-col items-center justify-center text-center hover:bg-green-50">
+                    <div class="bg-green-100 text-green-600 rounded-full p-4 mb-4">
+                        <i class="fas fa-chart-line fa-2x"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800">판매 현황</h3>
+                    <p class="text-gray-500 mt-2">일별, 월별 매출을 분석합니다.</p>
+                </a>
+
+            </div>
+        </main>
+
+        <!-- 푸터 -->
+        <footer class="bg-white mt-auto">
+            <div class="container mx-auto px-6 py-4 text-center text-gray-500">
+                &copy; 2025 POS Project. All Rights Reserved.
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // 로그아웃 버튼 클릭 시 API 호출
+        document.getElementById('logout-button').addEventListener('click', async function(event) {
+            event.preventDefault();
+            
+            const response = await fetch('/api/auth/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                window.location.href = '/login';
+            } else {
+                alert('로그아웃에 실패했습니다.');
+            }
+        });
+    </script>
+</body>
+</html>

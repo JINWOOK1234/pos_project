@@ -1,7 +1,7 @@
 import click
 from flask import Flask, render_template, redirect, url_for, jsonify
 from flask.cli import with_appcontext
-from flask_login import current_user
+from flask_login import current_user, login_required
 
 # extensions.py에서 확장 기능 객체들을 가져옵니다.
 from extensions import db, migrate, login_manager
@@ -55,22 +55,49 @@ def create_app():
     app.register_blueprint(sales_bp)
 
     # 기본 페이지 라우트
+     # 기존의 index 라우트를 대시보드로 변경합니다.
     @app.route('/')
-    def index():
-        if current_user.is_authenticated:
-            return render_template('index.html')
-        return redirect(url_for('login_page'))
+    @login_required # 로그인이 필요한 페이지로 설정
+    def dashboard():
+        return render_template('dashboard.html')
 
     @app.route('/login')
     def login_page():
+        # 이미 로그인한 사용자가 /login 경로로 접근하면 대시보드로 리디렉션
+        if current_user.is_authenticated:
+            return redirect(url_for('dashboard'))
         return render_template('login.html')
 
     @app.route('/register')
     def register_page():
+        # 이미 로그인한 사용자가 /register 경로로 접근하면 대시보드로 리디렉션
+        if current_user.is_authenticated:
+            return redirect(url_for('dashboard'))
         return render_template('register.html')
     
-    return app
+    # --- 각 메뉴 페이지를 위한 임시 라우트 추가 ---
+    # 실제 페이지를 만들기 전까지 임시로 사용할 수 있습니다.
+    @app.route('/sales-registration')
+    @login_required
+    def sales_registration_page():
+        return render_template('sales_registration.html')
+    
+    @app.route('/purchase-registration')
+    @login_required
+    def purchase_registration_page():
+       return render_template('purchase_registration.html')
+   
+    @app.route('/settings')
+    @login_required
+    def settings_page():
+        return render_template('settings.html')
 
+    @app.route('/sales-status')
+    @login_required
+    def sales_status_page():
+        return "<h1>판매 현황 페이지</h1><a href='/'>대시보드로 돌아가기</a>"
+
+    return app
 # --- Flask-Login 콜백 함수 ---
 @login_manager.user_loader
 def load_user(user_id):
