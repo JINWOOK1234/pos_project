@@ -2,7 +2,8 @@ from flask import Blueprint, request, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 
 # 이 부분이 이제 안전하게 작동합니다.
-from app import db, User 
+from extensions import db
+from models import User
 
 auth_bp = Blueprint('auth_bp', __name__, url_prefix='/api/auth')
 
